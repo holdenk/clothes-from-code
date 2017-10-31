@@ -8,13 +8,13 @@ from pygments.lexers import guess_lexer_for_filename
 from pygments.formatters import JpgImageFormatter
 import io
 import tempfile
+import copy
 
-font_name = "Courier New"
-formatter = JpgImageFormatter(font_name=font_name)
-
-def highlight_file(filename):
+def highlight_file(style, filename):
     with open(filename) as f: code_txt = f.read()
     lexer = guess_lexer_for_filename(filename, code_txt)
+    font_name = "Courier New"
+    formatter = JpgImageFormatter(font_name=font_name, style=style)
     return Image.open(io.BytesIO(highlight(code_txt, lexer, formatter)))
 
 def glitch_image(image, amount_glitch, glitch_itr):
@@ -67,10 +67,10 @@ def tileify(img):
     
 
 def build_images(filenames,
-                style="terminal",
+                style="paraiso-dark",
                 amount_glitch = 75,
                 glitch_itr = 6):
-    highlighted = map(highlight_file, filenames)
+    highlighted = map(lambda filename: highlight_file(style, filename), filenames)
     ocropped = map(tileify, highlighted)
     print("cropped...")
     cropped = []
@@ -78,15 +78,16 @@ def build_images(filenames,
         for i in c:
             cropped.append(i)
     print("compacted to {0}".format(cropped))
-    glitched = map(lambda img: glitch_image(img, amount_glitch, glitch_itr),
+    glitched_tiled = map(lambda img: glitch_image(img, amount_glitch, glitch_itr),
                    cropped)
-    return (cropped, glitched)
+    glitched = map(lambda img: glitch_image(img, amount_glitch, glitch_itr), highlighted)
+    return (highlighted, glitched, cropped, glitched_tiled)
 
 
 def build_image(filenames,
-                style="terminal",
+                style="paraiso-dark",
                 amount_glitch = 75,
                 glitch_itr = 6,
                 precent_original = 10):
-    imgs = build_images(filenames, style, amount_glitch, glitch_tr)
-    
+    (highlighted, glitched, cropped, glitched_tiled) = build_images(filenames, style, amount_glitch, glitch_itr)
+    return (highlighted, glitched, cropped, glitched_tiled)
