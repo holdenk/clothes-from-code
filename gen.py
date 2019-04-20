@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import pygments
 import random
-from PIL import Image
+from PIL import Image, ImageStat
 import jpglitch
 from pygments import highlight
 from pygments.lexers import guess_lexer_for_filename
@@ -17,9 +17,12 @@ import math
 desired_max_tiles = 100
 tile_target_width = 500
 tile_target_height = 500
+tile_variance_threshold = 500
+tile_min_max_threshold = 110
 
 
 def highlight_file(style, filename):
+    """ Hightlight a given file guessing the lexer based on the extension """
     with open(filename) as f:
         code_txt = f.read()
         lexer = guess_lexer_for_filename(filename, code_txt)
@@ -59,11 +62,28 @@ def tileify(img):
     Takes in an image and produces several smaller tiles.
     Tiles are uniform in shape but may not be uniformly cut.
     """
+    def contains_interesting_code(img):
+        """Returns true if the image tile contains enough variation"""
+        stat = ImageStat.Stat(img)
+        total_variance = sum(stat.var)
+        min_max_diff = map(lambda x: x[1]-x[0], stat.extrema)
+        min_max_diff_sum = sum(min_max_diff)
+        print("Got variance {0} from {1} min_max_dif {2} from {3}".format(
+            total_variance,
+            stat.var,
+            min_max_diff_sum,
+            min_max_diff))
+        return (
+            total_variance > tile_variance_threshold and
+            min_max_diff_sum > tile_min_max_threshold)
+
     offset_range = 50
     # crop takes (left, upper, right, lower)-tuple.
     source_size = img.size
     print("Source image size {0}".format(source_size))
-    ret = []
+    # Construct a list of possible areas of the input image
+    # we want to turn into tiles
+    candidate_coordinates = []
     # Generate tiles iteratively with some skew
     for w in range(int(math.ceil(source_size[0] / tile_target_width))):
         for h in range(int(math.ceil(source_size[1] / tile_target_height))):
@@ -81,26 +101,42 @@ def tileify(img):
             y0 = y_offset + (h * tile_target_height)
             x1 = x_offset + ((w + 1) * tile_target_width)
             y1 = y_offset + ((h + 1) * tile_target_height)
-            ret.append(img.crop((x0, y0, x1, y1)))
+            candidate_coordinates.append((x0, y0, x1, y1))
     # Generate 10 random tiles from "somewhere" in the image
-    num_tiles = 10
-    for _ in range(num_tiles):
+    num_tiles_random = 10
+    for _ in range(num_tiles_random):
         x0 = random.randint(0, source_size[0] - tile_target_width)
         y0 = random.randint(0, source_size[1] - tile_target_height)
 
         x1 = x0 + tile_target_width
         y1 = y0 + tile_target_height
 
-        ret.append(img.crop((x0, y0, x1, y1)))
-    return random.sample(ret, min(desired_max_tiles, len(ret)))
+        candidate_coordinates.append((x0, y0, x1, y1))
+    # Take the coordinates and turn them into tile images, filtering out
+    # antyhing which doesn't have any variation inside of it
+    tiles = []
+    for coordinates in candidate_coordinates:
+        cropped_image = img.crop(coordinates)
+        if contains_interesting_code(cropped_image):
+            tiles.append(cropped_image)
+
+    # If we have a lot of potential tiles generatinge everything is going to be slow
+    num_tiles_to_return = min(desired_max_tiles, len(tiles))
+    # Sampled without replacement yay
+    return random.sample(tiles, num_tiles_to_return)
 
 
 def build_tiles(filenames,
                 style,
                 amount_glitch,
                 glitch_itr):
-    highlighted = map(lambda filename: highlight_file(
-        style, filename), filenames)
+    """ Builds the tiles which we will assembly into a dress """
+    # Highlight all of our inputs
+    highlighted = map(
+        lambda filename: highlight_file(style, filename),
+        filenames)
+    # Take the inputs and chop them up into tiles of a consistent size but semi random
+    # locations
     ocropped = map(tileify, highlighted)
     print("cropped...")
     cropped = []
@@ -115,6 +151,7 @@ def build_tiles(filenames,
         img, amount_glitch, glitch_itr), highlighted)
     return (highlighted, glitched, cropped, glitched_tiled)
 
+# These are the dress pieces for the dress with pockets on cowcow
 #Front(Center) : 1487 x 4796 or Higher
 #Front Left(Center) : 1053 x 4780 or Higher
 #Front Right(Center) : 1053 x 4780 or Higher
@@ -126,23 +163,25 @@ def build_tiles(filenames,
 #Sleeve Right(Center) : 1775 x 2140 or Higher
 #Pocket Left(Center) : 1067 x 703 or Higher
 #Back Leftside(Center) : 1039 x 4803 or Higher
+cowcow_dress_with_pockets = [
+    ("front", (1487, 4796)),
+    ("front_left", (1053, 4780)),
+    ("front_right", (1053, 4780)),
+    ("back_right", (878, 4803)),
+    ("sleeve_left", (1775, 2140)),
+    ("pocket_right", (1067, 704)),
+    ("back_left", (881, 4818)),
+    ("back_rightside", (1039, 4803)),
+    ("sleeve_right", (1775, 2140)),
+    ("pocket_left", (1067, 703)),
+    ("back_leftside", (1039, 4803))]
+
 def build_image(filenames,
                 style="paraiso-dark",
                 amount_glitch=75,
                 glitch_itr=6,
                 percent_original=10,
-                dress_piece_dims=[
-                    ("front", (1487, 4796)),
-                    ("front_left", (1053, 4780)),
-                    ("front_right", (1053, 4780)),
-                    ("back_right", (878, 4803)),
-                    ("sleeve_left", (1775, 2140)),
-                    ("pocket_right", (1067, 704)),
-                    ("back_left", (881, 4818)),
-                    ("back_rightside", (1039, 4803)),
-                    ("sleeve_right", (1775, 2140)),
-                    ("pocket_left", (1067, 703)),
-                    ("back_leftside", (1039, 4803))]):
+                dress_piece_dims=cowcow_dress_with_pockets):
     (highlighted, glitched, cropped, glitched_tiled) = build_tiles(
         filenames, style, amount_glitch, glitch_itr)
     num_tiles = len(cropped)
