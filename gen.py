@@ -69,7 +69,7 @@ def tileify(img):
     return ret
     
 
-def build_images(filenames,
+def build_tiles(filenames,
                 style="paraiso-dark",
                 amount_glitch = 75,
                 glitch_itr = 6):
@@ -91,9 +91,34 @@ def build_image(filenames,
                 style="paraiso-dark",
                 amount_glitch = 75,
                 glitch_itr = 6,
-                precent_original = 10):
-    (highlighted, glitched, cropped, glitched_tiled) = build_images(filenames, style, amount_glitch, glitch_itr)
-    return (highlighted, glitched, cropped, glitched_tiled)
+                percent_original = 10,
+                dress_piece_dims = [
+                    (878, 4803), (1487, 4796), (1053, 4780), (1775, 2140), (1067, 704),
+                    (1775, 2140), (1067, 703), (881, 4818), (1039, 4803), (1039, 4803),
+                    (1053, 4780)]):
+    (highlighted, glitched, cropped, glitched_tiled) = build_tiles(filenames, style, amount_glitch, glitch_itr)
+    num_tiles = len(cropped)
+    def random_tile():
+        tile_idx = random.randint(0, num_tiles - 1)
+        if random.randint(0, 100) < percent_original:
+            return cropped[tile_idx]
+        else:
+            return glitched_tiled[tile_idx]
+    input_tile_width = 500
+    input_tile_height = 500
+    
+    def make_piece(dim):
+        """Make some glitched code combined for some specific dimensions"""
+        img = Image.new('RGB', dim)
+        for i in range(0, dim[0], input_tile_width):
+            for j in range(0, dim[1], input_tile_height):
+                img.paste(random_tile(), (i, j))
+        return img
+
+    pieces = map(make_piece, dress_piece_dims)
+        
+        
+    return (pieces, highlighted, glitched, cropped, glitched_tiled)
 
 def make_if_needed(target_dir):
     """Make a directory if it does not exist"""
@@ -126,7 +151,8 @@ if __name__ == "__main__":
                         help="output extension")
     args = parser.parse_args()
     make_if_needed(args.output)
-    (highlighted, glitched, cropped, glitched_tiled) = build_image(args.files)
+    (processed, highlighted, glitched, cropped, glitched_tiled) = build_image(args.files)
+    save_imgs(args.output + "/processed", processed, args.extension)
     save_imgs(args.output + "/highlighted", highlighted, args.extension)
     save_imgs(args.output + "/glitched", glitched, args.extension)
     save_imgs(args.output + "/cropped", cropped, args.extension)
