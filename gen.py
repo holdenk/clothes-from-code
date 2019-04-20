@@ -77,7 +77,8 @@ def build_tiles(filenames,
                 style,
                 amount_glitch,
                 glitch_itr):
-    highlighted = map(lambda filename: highlight_file(style, filename), filenames)
+    highlighted = map(lambda filename: highlight_file(
+        style, filename), filenames)
     ocropped = map(tileify, highlighted)
     print("cropped...")
     cropped = []
@@ -86,8 +87,9 @@ def build_tiles(filenames,
             cropped.append(i)
     print("compacted to {0}".format(cropped))
     glitched_tiled = map(lambda img: glitch_image(img, amount_glitch, glitch_itr),
-                   cropped)
-    glitched = map(lambda img: glitch_image(img, amount_glitch, glitch_itr), highlighted)
+                         cropped)
+    glitched = map(lambda img: glitch_image(
+        img, amount_glitch, glitch_itr), highlighted)
     return (highlighted, glitched, cropped, glitched_tiled)
 
 
@@ -95,13 +97,17 @@ def build_image(filenames,
                 style="paraiso-dark",
                 amount_glitch=75,
                 glitch_itr=6,
-                percent_original = 10,
-                dress_piece_dims = [
-                    (878, 4803), (1487, 4796), (1053, 4780), (1775, 2140), (1067, 704),
-                    (1775, 2140), (1067, 703), (881, 4818), (1039, 4803), (1039, 4803),
+                percent_original=10,
+                dress_piece_dims=[
+                    (878, 4803), (1487, 4796), (1053,
+                                                4780), (1775, 2140), (1067, 704),
+                    (1775, 2140), (1067, 703), (881,
+                                                4818), (1039, 4803), (1039, 4803),
                     (1053, 4780)]):
-    (highlighted, glitched, cropped, glitched_tiled) = build_tiles(filenames, style, amount_glitch, glitch_itr)
+    (highlighted, glitched, cropped, glitched_tiled) = build_tiles(
+        filenames, style, amount_glitch, glitch_itr)
     num_tiles = len(cropped)
+
     def random_tile():
         tile_idx = random.randint(0, num_tiles - 1)
         if random.randint(0, 100) < percent_original:
@@ -110,7 +116,7 @@ def build_image(filenames,
             return glitched_tiled[tile_idx]
     input_tile_width = 500
     input_tile_height = 500
-    
+
     def make_piece(dim):
         """Make some glitched code combined for some specific dimensions"""
         img = Image.new('RGB', dim)
@@ -120,9 +126,9 @@ def build_image(filenames,
         return img
 
     pieces = map(make_piece, dress_piece_dims)
-        
-        
+
     return (pieces, highlighted, glitched, cropped, glitched_tiled)
+
 
 def make_if_needed(target_dir):
     """Make a directory if it does not exist"""
@@ -133,13 +139,15 @@ def make_if_needed(target_dir):
             raise
         pass
 
+
 def save_imgs(target_dir, imgs, ext):
     idx = 0
     make_if_needed(target_dir)
     for img in imgs:
-        idx = idx +1
+        idx = idx + 1
         filename = "{0}/{1}.{2}".format(target_dir, idx, ext)
         img.save(filename)
+
 
 if __name__ == "__main__":
     import argparse
@@ -155,13 +163,10 @@ if __name__ == "__main__":
                         help="output extension")
     args = parser.parse_args()
     make_if_needed(args.output)
-    (processed, highlighted, glitched, cropped, glitched_tiled) = build_image(args.files)
+    (processed, highlighted, glitched, cropped,
+     glitched_tiled) = build_image(args.files)
     save_imgs(args.output + "/processed", processed, args.extension)
     save_imgs(args.output + "/highlighted", highlighted, args.extension)
     save_imgs(args.output + "/glitched", glitched, args.extension)
     save_imgs(args.output + "/cropped", cropped, args.extension)
     save_imgs(args.output + "/glitched_tiled", glitched_tiled, args.extension)
-
-        
-    
-    
