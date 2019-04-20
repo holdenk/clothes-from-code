@@ -86,8 +86,9 @@ def build_tiles(filenames,
         for i in c:
             cropped.append(i)
     print("compacted to {0}".format(cropped))
-    glitched_tiled = map(lambda img: glitch_image(img, amount_glitch, glitch_itr),
-                         cropped)
+    glitched_tiled = map(
+        lambda img: glitch_image(img, amount_glitch, glitch_itr),
+        cropped)
     glitched = map(lambda img: glitch_image(
         img, amount_glitch, glitch_itr), highlighted)
     return (highlighted, glitched, cropped, glitched_tiled)
@@ -99,10 +100,10 @@ def build_image(filenames,
                 glitch_itr=6,
                 percent_original=10,
                 dress_piece_dims=[
-                    (878, 4803), (1487, 4796), (1053,
-                                                4780), (1775, 2140), (1067, 704),
-                    (1775, 2140), (1067, 703), (881,
-                                                4818), (1039, 4803), (1039, 4803),
+                    (878, 4803), (1487, 4796),
+                    (1053, 4780), (1775, 2140), (1067, 704),
+                    (1775, 2140), (1067, 703),
+                    (881,  4818), (1039, 4803), (1039, 4803),
                     (1053, 4780)]):
     (highlighted, glitched, cropped, glitched_tiled) = build_tiles(
         filenames, style, amount_glitch, glitch_itr)
