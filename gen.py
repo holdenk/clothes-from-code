@@ -9,11 +9,14 @@ from pygments.formatters import JpgImageFormatter
 import io
 import tempfile
 import copy
+import errno
+import os
+
 
 def highlight_file(style, filename):
     with open(filename) as f: code_txt = f.read()
     lexer = guess_lexer_for_filename(filename, code_txt)
-    font_name = "Courier New"
+    font_name = "Ubuntu Mono"
     formatter = JpgImageFormatter(font_name=font_name, style=style)
     return Image.open(io.BytesIO(highlight(code_txt, lexer, formatter)))
 
@@ -91,3 +94,44 @@ def build_image(filenames,
                 precent_original = 10):
     (highlighted, glitched, cropped, glitched_tiled) = build_images(filenames, style, amount_glitch, glitch_itr)
     return (highlighted, glitched, cropped, glitched_tiled)
+
+def make_if_needed(target_dir):
+    """Make a directory if it does not exist"""
+    try:
+        os.mkdir(target_dir)
+    except OSError as exc:
+        if exc.errno != errno.EEXIST:
+            raise
+        pass
+
+def save_imgs(target_dir, imgs, ext):
+    idx = 0
+    make_if_needed(target_dir)
+    for img in imgs:
+        idx = idx +1
+        filename = "{0}/{1}.{2}".format(target_dir, idx, ext)
+        img.save(filename)
+
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(description='Process some code')
+    parser.add_argument('--files', type=str, default=["gen.py"],
+                        nargs="*",
+                        help="file names to process")
+    parser.add_argument('--output', type=str, default="out",
+                        nargs="?",
+                        help="output directory")
+    parser.add_argument('--extension', type=str, default="png",
+                        nargs="?",
+                        help="output extension")
+    args = parser.parse_args()
+    make_if_needed(args.output)
+    (highlighted, glitched, cropped, glitched_tiled) = build_image(args.files)
+    save_imgs(args.output + "/highlighted", highlighted, args.extension)
+    save_imgs(args.output + "/glitched", glitched, args.extension)
+    save_imgs(args.output + "/cropped", cropped, args.extension)
+    save_imgs(args.output + "/glitched_tiled", glitched_tiled, args.extension)
+
+        
+    
+    
