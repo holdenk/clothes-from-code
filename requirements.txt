@@ -1,0 +1,5 @@
+pygments
+pillow
+git+https://github.com/Kareeeeem/jpglitch
+mechanize
+selenium
