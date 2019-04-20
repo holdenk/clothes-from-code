@@ -13,6 +13,11 @@ import errno
 import os
 import math
 
+# Some sketchy global configs
+desired_max_tiles = 100
+tile_target_width = 500
+tile_target_height = 500
+
 
 def highlight_file(style, filename):
     with open(filename) as f:
@@ -54,42 +59,40 @@ def tileify(img):
     Takes in an image and produces several smaller tiles.
     Tiles are uniform in shape but may not be uniformly cut.
     """
-    target_width = 500
-    target_height = 500
     offset_range = 50
     # crop takes (left, upper, right, lower)-tuple.
     source_size = img.size
     print("Source image size {0}".format(source_size))
     ret = []
     # Generate tiles iteratively with some skew
-    for w in range(int(math.ceil(source_size[0] / target_width))):
-        for h in range(int(math.ceil(source_size[1] / target_height))):
+    for w in range(int(math.ceil(source_size[0] / tile_target_width))):
+        for h in range(int(math.ceil(source_size[1] / tile_target_height))):
             x_offset = min(
-                source_size[0] - target_width,
+                source_size[0] - tile_target_width,
                 (random.randint(0, offset_range) +
-                 source_size[0] - ((w + 1) * target_width)))
+                 source_size[0] - ((w + 1) * tile_target_width)))
             y_offset = min(
-                source_size[1] - target_height,
+                source_size[1] - tile_target_height,
                 (random.randint(0, offset_range) +
-                 source_size[1] - ((h + 1) * target_height)))
+                 source_size[1] - ((h + 1) * tile_target_height)))
             print("Generating image for ({0},{1}) with offsets ({2},{3})".format(
                 w, h, x_offset, y_offset))
-            x0 = x_offset + (w * target_width)
-            y0 = y_offset + (h * target_height)
-            x1 = x_offset + ((w + 1) * target_width)
-            y1 = y_offset + ((h + 1) * target_height)
+            x0 = x_offset + (w * tile_target_width)
+            y0 = y_offset + (h * tile_target_height)
+            x1 = x_offset + ((w + 1) * tile_target_width)
+            y1 = y_offset + ((h + 1) * tile_target_height)
             ret.append(img.crop((x0, y0, x1, y1)))
     # Generate 10 random tiles from "somewhere" in the image
     num_tiles = 10
     for _ in range(num_tiles):
-        x0 = random.randint(0, source_size[0] - target_width)
-        y0 = random.randint(0, source_size[1] - target_height)
+        x0 = random.randint(0, source_size[0] - tile_target_width)
+        y0 = random.randint(0, source_size[1] - tile_target_height)
 
-        x1 = x0 + target_width
-        y1 = y0 + target_height
+        x1 = x0 + tile_target_width
+        y1 = y0 + tile_target_height
 
         ret.append(img.crop((x0, y0, x1, y1)))
-    return ret
+    return random.sample(ret, min(desired_max_tiles, len(ret)))
 
 
 def build_tiles(filenames,
@@ -150,15 +153,13 @@ def build_image(filenames,
             return cropped[tile_idx]
         else:
             return glitched_tiled[tile_idx]
-    input_tile_width = 500
-    input_tile_height = 500
 
     def make_piece(name_dim):
         """Make some glitched code combined for some specific dimensions"""
         dim = name_dim[1]
         img = Image.new('RGB', dim)
-        for i in range(0, dim[0], input_tile_width):
-            for j in range(0, dim[1], input_tile_height):
+        for i in range(0, dim[0], tile_tile_width):
+            for j in range(0, dim[1], tile_tile_height):
                 img.paste(random_tile(), (i, j))
         return (name_dim[0], img)
 
