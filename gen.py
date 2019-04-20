@@ -158,8 +158,8 @@ def build_image(filenames,
         """Make some glitched code combined for some specific dimensions"""
         dim = name_dim[1]
         img = Image.new('RGB', dim)
-        for i in range(0, dim[0], tile_tile_width):
-            for j in range(0, dim[1], tile_tile_height):
+        for i in range(0, dim[0], tile_target_width):
+            for j in range(0, dim[1], tile_target_height):
                 img.paste(random_tile(), (i, j))
         return (name_dim[0], img)
 
