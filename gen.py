@@ -93,18 +93,34 @@ def build_tiles(filenames,
         img, amount_glitch, glitch_itr), highlighted)
     return (highlighted, glitched, cropped, glitched_tiled)
 
-
+#Front(Center) : 1487 x 4796 or Higher
+#Front Left(Center) : 1053 x 4780 or Higher
+#Front Right(Center) : 1053 x 4780 or Higher
+#Back Right(Center) : 878 x 4803 or Higher
+#Sleeve Left(Center) : 1775 x 2140 or Higher
+#Pocket Right(Center) : 1067 x 704 or Higher
+#Back Left(Center) : 881 x 4818 or Higher
+#Back Rightside(Center) : 1039 x 4803 or Higher
+#Sleeve Right(Center) : 1775 x 2140 or Higher
+#Pocket Left(Center) : 1067 x 703 or Higher
+#Back Leftside(Center) : 1039 x 4803 or Higher
 def build_image(filenames,
                 style="paraiso-dark",
                 amount_glitch=75,
                 glitch_itr=6,
                 percent_original=10,
                 dress_piece_dims=[
-                    (878, 4803), (1487, 4796),
-                    (1053, 4780), (1775, 2140), (1067, 704),
-                    (1775, 2140), (1067, 703),
-                    (881,  4818), (1039, 4803), (1039, 4803),
-                    (1053, 4780)]):
+                    ("front", (1487, 4796)),
+                    ("front_left", (1053, 4780)),
+                    ("front_right", (1053, 4780)),
+                    ("back_right", (878, 4803)),
+                    ("sleeve_left", (1775, 2140)),
+                    ("pocket_right", (1067, 704)),
+                    ("back_left", (881, 4818)),
+                    ("back_right", (1039, 4803)),
+                    ("sleeve_right", (1775, 2140)),
+                    ("pocket_left", (1067, 703)),
+                    ("back_left", (1039, 4803))]):
     (highlighted, glitched, cropped, glitched_tiled) = build_tiles(
         filenames, style, amount_glitch, glitch_itr)
     num_tiles = len(cropped)
@@ -118,13 +134,14 @@ def build_image(filenames,
     input_tile_width = 500
     input_tile_height = 500
 
-    def make_piece(dim):
+    def make_piece(name_dim):
         """Make some glitched code combined for some specific dimensions"""
+        dim = name_dim[1]
         img = Image.new('RGB', dim)
         for i in range(0, dim[0], input_tile_width):
             for j in range(0, dim[1], input_tile_height):
                 img.paste(random_tile(), (i, j))
-        return img
+        return (name_dim[0], img)
 
     pieces = map(make_piece, dress_piece_dims)
 
@@ -147,7 +164,11 @@ def save_imgs(target_dir, imgs, ext):
     for img in imgs:
         idx = idx + 1
         filename = "{0}/{1}.{2}".format(target_dir, idx, ext)
-        img.save(filename)
+        if type(img) is tuple:
+            filename = "{0}/{1}.{2}".format(target_dir, img[0], ext)
+            img[1].save(filename)
+        else:
+            img.save(filename)
 
 
 if __name__ == "__main__":
