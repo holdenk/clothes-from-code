@@ -14,11 +14,13 @@ import os
 
 
 def highlight_file(style, filename):
-    with open(filename) as f: code_txt = f.read()
-    lexer = guess_lexer_for_filename(filename, code_txt)
-    font_name = "Ubuntu Mono"
-    formatter = JpgImageFormatter(font_name=font_name, style=style)
-    return Image.open(io.BytesIO(highlight(code_txt, lexer, formatter)))
+    with open(filename) as f:
+        code_txt = f.read()
+        lexer = guess_lexer_for_filename(filename, code_txt)
+        font_name = "Ubuntu Mono"
+        formatter = JpgImageFormatter(font_name=font_name, style=style)
+        return Image.open(io.BytesIO(highlight(code_txt, lexer, formatter)))
+
 
 def glitch_image(image, amount_glitch, glitch_itr):
     # Note: Image warns us to use save with BytesIO instead
@@ -28,8 +30,9 @@ def glitch_image(image, amount_glitch, glitch_itr):
     image_array = bytearray(buff.getvalue())
     seed = random.randint(0, 99)
 
-    # We set iterations to 3 so we can verify each itr hasn't fucked the world otherwise glitch_bytes could go a bit extreme.
-    jpeg = jpglitch.Jpeg(image_array, amount_glitch, seed, iterations = 3)
+    # We set iterations to 3 so we can verify each itr hasn't fucked
+    # the world otherwise glitch_bytes could go a bit extreme.
+    jpeg = jpglitch.Jpeg(image_array, amount_glitch, seed, iterations=3)
     img_bytes = jpeg.new_bytes
     # Gltich the image until max itrs, or stop if it doesn't open anymore
     for i in range(glitch_itr):
@@ -43,6 +46,7 @@ def glitch_image(image, amount_glitch, glitch_itr):
         except IOError:
             break
     return Image.open(io.BytesIO(img_bytes))
+
 
 def tileify(img):
     """
@@ -67,12 +71,12 @@ def tileify(img):
             y1 = y_offset + ((h + 1) * target_height)
             ret.append(img.crop((x0, y0, x1, y1)))
     return ret
-    
+
 
 def build_tiles(filenames,
-                style="paraiso-dark",
-                amount_glitch = 75,
-                glitch_itr = 6):
+                style,
+                amount_glitch,
+                glitch_itr):
     highlighted = map(lambda filename: highlight_file(style, filename), filenames)
     ocropped = map(tileify, highlighted)
     print("cropped...")
@@ -89,8 +93,8 @@ def build_tiles(filenames,
 
 def build_image(filenames,
                 style="paraiso-dark",
-                amount_glitch = 75,
-                glitch_itr = 6,
+                amount_glitch=75,
+                glitch_itr=6,
                 percent_original = 10,
                 dress_piece_dims = [
                     (878, 4803), (1487, 4796), (1053, 4780), (1775, 2140), (1067, 704),
