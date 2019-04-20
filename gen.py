@@ -117,10 +117,10 @@ def build_image(filenames,
                     ("sleeve_left", (1775, 2140)),
                     ("pocket_right", (1067, 704)),
                     ("back_left", (881, 4818)),
-                    ("back_right", (1039, 4803)),
+                    ("back_rightside", (1039, 4803)),
                     ("sleeve_right", (1775, 2140)),
                     ("pocket_left", (1067, 703)),
-                    ("back_left", (1039, 4803))]):
+                    ("back_leftside", (1039, 4803))]):
     (highlighted, glitched, cropped, glitched_tiled) = build_tiles(
         filenames, style, amount_glitch, glitch_itr)
     num_tiles = len(cropped)
