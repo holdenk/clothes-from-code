@@ -11,6 +11,7 @@ import tempfile
 import copy
 import errno
 import os
+import math
 
 
 def highlight_file(style, filename):
@@ -58,18 +59,36 @@ def tileify(img):
     offset_range = 50
     # crop takes (left, upper, right, lower)-tuple.
     source_size = img.size
+    print("Source image size {0}".format(source_size))
     ret = []
-    for w in range(source_size[0] / target_width):
-        for h in range(source_size[1] / target_height):
-            x_offset = min(random.randint(0, offset_range),
-                           source_size[0] - ((w + 1) * target_width))
-            y_offset = min(random.randint(0, offset_range),
-                           source_size[1] - ((h + 1) * target_height))
+    # Generate tiles iteratively with some skew
+    for w in range(int(math.ceil(source_size[0] / target_width))):
+        for h in range(int(math.ceil(source_size[1] / target_height))):
+            x_offset = min(
+                source_size[0] - target_width,
+                (random.randint(0, offset_range) +
+                 source_size[0] - ((w + 1) * target_width)))
+            y_offset = min(
+                source_size[1] - target_height,
+                (random.randint(0, offset_range) +
+                 source_size[1] - ((h + 1) * target_height)))
+            print("Generating image for ({0},{1}) with offsets ({2},{3})".format(
+                w, h, x_offset, y_offset))
             x0 = x_offset + (w * target_width)
             y0 = y_offset + (h * target_height)
             x1 = x_offset + ((w + 1) * target_width)
             y1 = y_offset + ((h + 1) * target_height)
             ret.append(img.crop((x0, y0, x1, y1)))
+    # Generate 10 random tiles from "somewhere" in the image
+    num_tiles = 10
+    for _ in range(num_tiles):
+        x0 = random.randint(0, source_size[0] - target_width)
+        y0 = random.randint(0, source_size[1] - target_height)
+
+        x1 = x0 + target_width
+        y1 = y0 + target_height
+
+        ret.append(img.crop((x0, y0, x1, y1)))
     return ret
 
 
