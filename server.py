@@ -61,7 +61,8 @@ def extract_dress_name(code_url):
             return match.group(1) + "'s " + match.group(2) + " glitch code dress"
     else:
         # Some folks have the group and repo name as the same
-        if match.group(1) != match.group(2):
+        if (match.group(1) != match.group(2) and
+            ! match.group(2).startswith(match.group(1))):
             return match.group(1) + " " + match.group(2) + "'s " + match.group(3) + " glitch code dress"
         else:
             return match.group(2) + "'s " + match.group(3) + " glitch code dress"
