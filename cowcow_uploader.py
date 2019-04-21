@@ -1,3 +1,4 @@
+import argparse
 import re
 from cowcowsecrets import *
 from selenium import webdriver
@@ -17,20 +18,19 @@ file_manager = "https://www.cowcow.com/Member/FileManager.aspx"
 login_url = "https://www.cowcow.com/Login.aspx?Return=%2fMember%2fFileManager.aspx"
 bulk_product_url = "https://www.cowcow.com/Stores/StoreBulkProduct.aspx?StoreId=264507&SectionCode="
 
-driver = webdriver.Firefox()
 
-
-def construct_br():
+def construct_br(driver):
     br = load_cookie_or_login()
     br.set_handle_robots(False)
     return br
 
 
-def load_cookie_or_login():
-    return do_login(username, password)
+def load_cookie_or_login(driver):
+    # Todo: cache cookies
+    return do_login(driver, username, password)
 
 
-def do_login(username, password):
+def do_login(driver, username, password):
     """ Login to cowcow """
     driver.get(login_url)
     assert "Login" in driver.title
@@ -111,7 +111,7 @@ def upload_dress_imgs(br, dress_output_directory):
     return upload_imgs(imgs)
 
 
-def create_dress(dress_output_directory, dress_name):
+def create_dress(driver, dress_output_directory, dress_name):
     def filename_to_cowcow(f):
         cowcowname = "{0}_processed_{1}.png({2})".format(
             dress_output_directory,
@@ -146,16 +146,20 @@ def create_dress(dress_output_directory, dress_name):
 
 
 if __name__ == "__main__":
-    import argparse
-    parser = argparse.ArgumentParser(description='Upload a dress to cowcow')
-    parser.add_argument('--dress_name', type=str,
-                        nargs="?",
-                        help="name of the dress")
-    parser.add_argument('--dress_dir', type=str,
-                        nargs="?",
-                        help="directory where the dress files all live")
-    args = parser.parse_args()
+    try:
+        parser = argparse.ArgumentParser(description='Upload a dress to cowcow')
+        parser.add_argument('--dress_name', type=str,
+                            nargs="?",
+                            help="name of the dress")
+        parser.add_argument('--dress_dir', type=str,
+                            nargs="?",
+                            help="directory where the dress files all live")
+        args = parser.parse_args()
 
-    br = construct_br()
-    upload_dress_imgs(br, args.dress_dir)
-    create_dress(args.dress_dir, args.dress_name)
+        driver = webdriver.Firefox()
+
+        br = construct_br(driver)
+        upload_dress_imgs(br, args.dress_dir)
+        create_dress(driver, args.dress_dir, args.dress_name)
+    finally:
+        driver.close()
