@@ -5,10 +5,10 @@ FROM python:3.7.2-stretch
 WORKDIR /usr/src/app
 
 # Downoad flask
-RUN apt-get update && apt-get install python-flask3
+RUN apt-get update && apt-get install -y apt-utils python3-flask && rm -rf /var/cache/apt
 
 # Download gecko driver
-RUN wget https://github.com/mozilla/geckodriver/releases/download/geckodriver-v0.24.0-linux64.tar.gz && \
+RUN wget https://github.com/mozilla/geckodriver/releases/download/v0.24.0/geckodriver-v0.24.0-linux64.tar.gz && \
     tar -xvf geckodriver-v0.24.0-linux64.tar.gz && \
     mv geckodriver /bin/ && \
     rm geckodriver-v0.24.0-linux64.tar.gz
