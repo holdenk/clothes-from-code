@@ -1,9 +1,9 @@
 <html>
-<p>We are now (very very slowly) generating your dress :)</p>
+<p>We are now (very very slowly) generating your dress, {{dress_name}}, based on the code at {{ code_url }} :)</p>
 
 <p>Here is what is going on:</p>
 {% for row in rows %}
 <p>{{ row }}</p>
 {% endfor %}
-<p>And the dress is done! Go <a href="https://www.cowcow.com/artist/holdensglitchcode?2855124">checkout the store</a></p>
+<p>And the dress is done (or we crashed)! Go <a href="https://www.cowcow.com/artist/holdensglitchcode?2855124">checkout the store</a>. Your dress should have a name {{dress_name}}.</p>
 </html>
