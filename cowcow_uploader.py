@@ -21,7 +21,7 @@ bulk_product_url = "https://www.cowcow.com/Stores/StoreBulkProduct.aspx?StoreId=
 
 
 def construct_br(driver):
-    br = load_cookie_or_login()
+    br = load_cookie_or_login(driver)
     br.set_handle_robots(False)
     return br
 
@@ -33,6 +33,7 @@ def load_cookie_or_login(driver):
 
 def do_login(driver, username, password):
     """ Login to cowcow """
+    print("Logging into cowcow t0 upload")
     driver.get(login_url)
     assert "Login" in driver.title
     username_elem = driver.find_element_by_name("tbEmail")
@@ -109,6 +110,7 @@ def upload_dress_imgs(br, dress_output_directory):
             dress_output_directory,
             f)
     imgs = map(create_absolute_filename, dress_filenames)
+    print("Uploading the images.")
     return upload_imgs(imgs)
 
 
@@ -137,6 +139,7 @@ def create_dress(driver, dress_output_directory, dress_name):
         section_code,
         dress_name)
     result = br.open(bulk_product_url)
+    print("Creating the product entry")
     driver.get(bulk_product_url)
     print("Sending in {0}".format(cowcow_product_spec))
     textElem = driver.find_element_by_name("ctl00$cphMain$tbBulkAddProduct")
@@ -157,7 +160,12 @@ if __name__ == "__main__":
                             help="directory where the dress files all live")
         args = parser.parse_args()
 
-        driver = webdriver.Firefox()
+        options = Options()
+
+        options.headless = True
+        options.add_argument("--headless")
+
+        driver = webdriver.Firefox(options=options)
 
         br = construct_br(driver)
         upload_dress_imgs(br, args.dress_dir)
