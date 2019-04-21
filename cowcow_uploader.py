@@ -19,13 +19,16 @@ bulk_product_url = "https://www.cowcow.com/Stores/StoreBulkProduct.aspx?StoreId=
 
 driver = webdriver.Firefox()
 
+
 def construct_br():
     br = load_cookie_or_login()
     br.set_handle_robots(False)
     return br
 
+
 def load_cookie_or_login():
     return do_login(username, password)
+
 
 def do_login(username, password):
     """ Login to cowcow """
@@ -61,7 +64,6 @@ def do_login(username, password):
     br = mechanize.Browser()
     br.set_cookiejar(cj)
     return br
-    
 
 
 def upload_imgs(imgs):
@@ -75,7 +77,7 @@ def upload_imgs(imgs):
         br.form = mechanize.HTMLForm(
             'https://www.cowcow.com/AjaxUpload.ashx',
             method='POST', enctype='multipart/form-data')
-        br.form.new_control('file', "files[]", {'id':'fileupload'})
+        br.form.new_control('file', "files[]", {'id': 'fileupload'})
         br.form.new_control('submit', 'Button', {})
         br.form.set_all_readonly(False)
         br.form.fixup()
@@ -98,6 +100,8 @@ dress_filenames = [
     "sleeve_right",
     "pocket_left",
     "back_leftside"]
+
+
 def upload_dress_imgs(br, dress_output_directory):
     def create_absolute_filename(f):
         return "{0}/processed/{1}.png".format(
@@ -105,6 +109,7 @@ def upload_dress_imgs(br, dress_output_directory):
             f)
     imgs = map(create_absolute_filename, dress_filenames)
     return upload_imgs(imgs)
+
 
 def create_dress(dress_output_directory, dress_name):
     def filename_to_cowcow(f):
@@ -122,7 +127,8 @@ def create_dress(dress_output_directory, dress_name):
     cowcow_img_spec = " | ".join(cowcow_img_specs)
     cowcow_product_id = "2170"
     section_code = "01"
-    unique_product_code = dress_output_directory + ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
+    unique_product_code = dress_output_directory + \
+        ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
     cowcow_product_spec = "{0}, {1}, {2}, {3}, {4}".format(
         cowcow_img_spec,
         cowcow_product_id,
@@ -137,8 +143,8 @@ def create_dress(dress_output_directory, dress_name):
     textElem.send_keys(cowcow_product_spec)
     updateElem = driver.find_element_by_id("ctl00_cphMain_ebImport")
     updateElem.click()
-    
-    
+
+
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description='Upload a dress to cowcow')
