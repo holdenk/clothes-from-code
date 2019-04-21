@@ -60,11 +60,15 @@ def extract_dress_name(code_url):
         else:
             return match.group(1) + "'s " + match.group(2) + " glitch code dress"
     else:
-        return match.group(1) + " " + match.group(2) + "'s " + match.group(3) + " glitch code dress"
+        # Some folks have the group and repo name as the same
+        if match.group(1) != match.group(2):
+            return match.group(1) + " " + match.group(2) + "'s " + match.group(3) + " glitch code dress"
+        else:
+            return match.group(2) + "'s " + match.group(3) + " glitch code dress"
 
 
 def clean_name(name):
-    return re.sub("\.", "-", name)[0:50]
+    return re.sub("\.", "-", name)[0:200]
 
 
 @app.template_filter('urlencode')
