@@ -199,7 +199,11 @@ def build_image(filenames,
         img = Image.new('RGB', dim)
         for i in range(0, dim[0], tile_target_width):
             for j in range(0, dim[1], tile_target_height):
-                img.paste(random_tile(), (i, j))
+                # Some tiles are bad, lets get another tile
+                try:
+                    img.paste(random_tile(), (i, j))
+                except IOError:
+                    img.paste(random_tile(), (i, j))
         return (name_dim[0], img)
 
     pieces = map(make_piece, dress_piece_dims)
