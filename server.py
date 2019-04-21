@@ -63,6 +63,10 @@ def extract_dress_name(code_url):
         return match.group(1) + " " + match.group(2) + "'s " + match.group(3) + " glitch code dress"
 
 
+def clean_name(name):
+    return re.sub("\.", "-", name)[0:50]
+
+
 @app.template_filter('urlencode')
 def urlencode_filter(s):
     if type(s) == 'Markup':
@@ -79,8 +83,8 @@ def generate_dress():
     else:
         requested_code_url = request.form["url"]
         code_url = handle_non_raw_code_urls(requested_code_url)
-        dress_name = extract_dress_name(code_url)
-        dress_dir = re.sub("[^a-zA-Z]", "_",  dress_name)
+        dress_name = clean_name(extract_dress_name(code_url))
+        dress_dir = re.sub("[^a-zA-Z]", "_",  dress_name)[0:10]
         proc = subprocess.Popen(
             ["./wrapwork.sh",
              dress_dir,

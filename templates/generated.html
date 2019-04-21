@@ -6,5 +6,11 @@
 <p>{{ row }}</p>
 {% endfor %}
 <p>And the dress is done (or we crashed)! Go <a href="https://www.cowcow.com/artist/holdensglitchcode?2855124&sort=2">checkout the store</a>. Your
-  <a href="https://www.cowcow.com/shop//{{dress_name | urlencode }}?2855124&store=holdensglitchcodedress should have a name {{dress_name}}</a>.</p>
+  <a href="https://www.cowcow.com/shop//{{dress_name | urlencode }}?2855124&store=holdensglitchcodedress"> should have a name {{dress_name}}</a>.</p>
+<!-- sketchy JS rdr --> 
+<script>
+  setTimeout(function() {
+  window.location.href = "https://www.cowcow.com/shop//{{dress_name | urlencode }}?2855124&store=holdensglitchcodedress";
+  }, 30000);
+</script>
 </html>
