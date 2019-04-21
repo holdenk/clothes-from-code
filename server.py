@@ -1,5 +1,8 @@
 from flask import Flask, Response, request, send_from_directory
 import re
+import subprocess
+
+
 app = Flask(__name__)
 
 @app.route('/')
@@ -21,6 +24,7 @@ def stream_template(template_name, **context):
     rv.enable_buffering(5)
     return rv
 
+
 bad_regex = re.compile("^http(s|)://(www.|)github.com/(.*?/.*?)/blob/(.*)$", re.IGNORECASE)
 def handle_non_raw_code_urls(code_url):
     """Some people will give us links to the non raw view"""
@@ -30,6 +34,7 @@ def handle_non_raw_code_urls(code_url):
     else:
         return "https://raw.githubusercontent.com/{0}/{1}".format(
             match.group(3), match.group(4))
+
 
 gh_raw_re = re.compile("^https://raw.githubusercontent.com/(.*?)/(.*?)/.*/(.*?)$")
 file_domain_re = re.compile("^https://(.*?)/.*/(.*?)$")
@@ -54,10 +59,12 @@ def generate_dress():
         requested_code_url = request.form["url"]
         code_url = handle_non_raw_code_urls(requested_code_url)
         dress_name = extract_dress_name(code_url)
-        rows = []
+        proc = subprocess.Popen(["./wrapwork.sh", dress_name, code_url],
+                                stdout=subprocess.PIPE, shell=False)
+        
         return Response(
             stream_template('generated.html',
                             dress_name=dress_name,
                             code_url=code_url,
-                            rows=rows))
+                            rows=proc.stdout))
 
