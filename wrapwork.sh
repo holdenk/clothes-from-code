@@ -4,4 +4,4 @@ if [ -z "$DRESS_NAME" ]; then
   exit 0
 fi
 ./dowork.sh
-rm -rf /tmp/${DRESS_NAME}
+rm -rf /tmp/"${DRESS_NAME}"
