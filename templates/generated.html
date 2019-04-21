@@ -5,5 +5,6 @@
 {% for row in rows %}
 <p>{{ row }}</p>
 {% endfor %}
-<p>And the dress is done (or we crashed)! Go <a href="https://www.cowcow.com/artist/holdensglitchcode?2855124">checkout the store</a>. Your dress should have a name {{dress_name}}.</p>
+<p>And the dress is done (or we crashed)! Go <a href="https://www.cowcow.com/artist/holdensglitchcode?2855124&sort=2">checkout the store</a>. Your
+  <a href="https://www.cowcow.com/shop//{{dress_name | urlencode }}?2855124&store=holdensglitchcodedress should have a name {{dress_name}}</a>.</p>
 </html>

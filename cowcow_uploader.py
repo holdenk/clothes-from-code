@@ -67,7 +67,6 @@ def do_login(username, password):
 def upload_imgs(imgs):
     """ Upload the images to cowcow """
     print("Uploading...")
-    return None
     for img in imgs:
         print("Fetching file manager...")
         time.sleep(1)
@@ -107,12 +106,18 @@ def upload_dress_imgs(br, dress_output_directory):
     imgs = map(create_absolute_filename, dress_filenames)
     return upload_imgs(imgs)
 
-def create_dress(dress_output_directory):
+def create_dress(dress_output_directory, dress_name):
     def filename_to_cowcow(f):
-        return "{0}_processed_{1}.png({2})".format(
+        cowcowname = "{0}_processed_{1}.png({2})".format(
             dress_output_directory,
             f,
-            re.sub("_", "", f))
+            # Our filenames are the names of the cowcow pieces but with _s, so strip them
+            re.sub("_", "", f)
+        )
+        # Any /s are replaced with _s so we play nice with the file manager
+        cowcowname = re.sub("/", "_", cowcowname)
+        return cowcowname
+
     cowcow_img_specs = map(filename_to_cowcow, dress_filenames)
     cowcow_img_spec = " | ".join(cowcow_img_specs)
     cowcow_product_id = "2170"
@@ -123,7 +128,7 @@ def create_dress(dress_output_directory):
         cowcow_product_id,
         unique_product_code,
         section_code,
-        "Glitch art dress for " + dress_output_directory)
+        dress_name)
     result = br.open(bulk_product_url)
     driver.get(bulk_product_url)
     print("Sending in {0}".format(cowcow_product_spec))
@@ -131,13 +136,20 @@ def create_dress(dress_output_directory):
     textElem.clear()
     textElem.send_keys(cowcow_product_spec)
     updateElem = driver.find_element_by_id("ctl00_cphMain_ebImport")
-#    updateElem = driver.find_element_by_name("import")
     updateElem.click()
     
     
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser(description='Upload a dress to cowcow')
+    parser.add_argument('--dress_name', type=str,
+                        nargs="?",
+                        help="name of the dress")
+    parser.add_argument('--dress_dir', type=str,
+                        nargs="?",
+                        help="directory where the dress files all live")
+    args = parser.parse_args()
 
-dress_output_directory = "out"
-
-br = construct_br()
-upload_dress_imgs(br, dress_output_directory)
-create_dress(dress_output_directory)
+    br = construct_br()
+    upload_dress_imgs(br, args.dress_dir)
+    create_dress(args.dress_dir, args.dress_name)

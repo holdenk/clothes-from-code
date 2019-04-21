@@ -49,8 +49,6 @@ def glitch_image(image, amount_glitch, glitch_itr):
         jpeg.glitch_bytes()
         try:
             stream = io.BytesIO(jpeg.new_bytes)
-            im = Image.open(stream)
-            im.save(tempfile.mkstemp("glitch.jpg")[1])
             img_bytes = jpeg.new_bytes
         except IOError:
             break
@@ -144,9 +142,9 @@ def build_tiles(filenames,
         for i in c:
             cropped.append(i)
     print("compacted to {0}".format(cropped))
-    glitched_tiled = map(
+    glitched_tiled = list(map(
         lambda img: glitch_image(img, amount_glitch, glitch_itr),
-        cropped)
+        cropped))
     glitched = map(lambda img: glitch_image(
         img, amount_glitch, glitch_itr), highlighted)
     return (highlighted, glitched, cropped, glitched_tiled)
@@ -244,8 +242,10 @@ if __name__ == "__main__":
                         help="output extension")
     args = parser.parse_args()
     make_if_needed(args.output)
+    print("Making the images in memory")
     (processed, highlighted, glitched, cropped,
      glitched_tiled) = build_image(args.files)
+    print("Saving the images to disk")
     save_imgs(args.output + "/processed", processed, args.extension)
     save_imgs(args.output + "/highlighted", highlighted, args.extension)
     save_imgs(args.output + "/glitched", glitched, args.extension)

@@ -1,6 +1,8 @@
 from flask import Flask, Response, request, send_from_directory
 import re
 import subprocess
+import urllib
+from markupsafe import Markup
 
 
 app = Flask(__name__)
@@ -49,7 +51,16 @@ def extract_dress_name(code_url):
             return match.group(1) + "'s " + match.group(2) + " glitch code dress"
     else:
         return match.group(1) + " " + match.group(2) + "'s " + match.group(3) + " glitch code dress" 
-    
+
+
+@app.template_filter('urlencode')
+def urlencode_filter(s):
+    if type(s) == 'Markup':
+        s = s.unescape()
+    s = s.encode('utf8')
+    s = urllib.parse.quote(s)
+    return Markup(s)
+
 
 @app.route('/generate_dress', methods=["POST"])
 def generate_dress():
@@ -59,8 +70,13 @@ def generate_dress():
         requested_code_url = request.form["url"]
         code_url = handle_non_raw_code_urls(requested_code_url)
         dress_name = extract_dress_name(code_url)
-        proc = subprocess.Popen(["./wrapwork.sh", dress_name, code_url],
-                                stdout=subprocess.PIPE, shell=False)
+        dress_dir = re.sub("[^a-zA-Z]", "_",  dress_name)
+        proc = subprocess.Popen(
+            ["./wrapwork.sh",
+             dress_dir,
+             dress_name,
+             code_url],
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
         
         return Response(
             stream_template('generated.html',
