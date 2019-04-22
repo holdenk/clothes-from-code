@@ -4,3 +4,4 @@ git+https://github.com/Kareeeeem/jpglitch
 mechanize
 selenium
 flask
+gunicorn
