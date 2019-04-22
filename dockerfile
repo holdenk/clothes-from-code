@@ -5,7 +5,7 @@ FROM python:3.7.2-stretch
 WORKDIR /usr/src/app
 
 # Downoad flask & firefox
-RUN apt-get update && apt-get install -y apt-utils python3-flask firefox-esr && rm -rf /var/cache/apt
+RUN apt-get update && apt-get install -y apt-utils python3-flask firefox-esr gunicorn && rm -rf /var/cache/apt
 
 # Download ubuntu fonts
 RUN wget https://assets.ubuntu.com/v1/fad7939b-ubuntu-font-family-0.83.zip && unzip fad7939b-ubuntu-font-family-0.83.zip && mv *ubuntu-font-family-0.83* /usr/share/fonts/truetype/ && fc-cache -f -v
