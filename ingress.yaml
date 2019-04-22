@@ -1,0 +1,11 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: tls-ingress
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: "haute-code"
+    networking.gke.io/managed-certificates: haute-certificate
+spec:
+  backend:
+    serviceName: haute-code
+    servicePort: 80

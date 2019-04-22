@@ -1,0 +1,27 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: haute-code
+  labels:
+    name: haute-code
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: haute-code
+  template:
+    metadata:
+      name: haute-code
+      labels:
+        name: haute-code
+    spec:
+      containers:
+        - name: haute-code
+          image: gcr.io/boos-demo-projects-are-rad/haute-code:v2
+          ports:
+            - containerPort: 5000
+          resources:
+            requests:
+              memory: 4024Mi
+            limits:
+              memory: 4548Mi
