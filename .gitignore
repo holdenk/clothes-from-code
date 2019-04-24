@@ -104,3 +104,5 @@ ENV/
 env/
 # Secrets
 cowcowsecrets.py
+ssl.key
+ssl.csr
