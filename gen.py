@@ -6,12 +6,14 @@ import jpglitch
 from pygments import highlight
 from pygments.lexers import guess_lexer_for_filename
 from pygments.formatters import JpgImageFormatter
+from pygments.styles import get_all_styles
 import io
 import tempfile
 import copy
 import errno
 import os
 import math
+import sys
 
 # Some sketchy global configs
 desired_max_tiles = 100
@@ -19,6 +21,42 @@ tile_target_width = 500
 tile_target_height = 500
 tile_variance_threshold = 500
 tile_min_max_threshold = 110
+
+CLOTHING = {
+# These are the dress pieces for the dress with pockets on cowcow
+# Front(Center) : 1487 x 4796 or Higher
+# Front Left(Center) : 1053 x 4780 or Higher
+# Front Right(Center) : 1053 x 4780 or Higher
+# Back Right(Center) : 878 x 4803 or Higher
+# Sleeve Left(Center) : 1775 x 2140 or Higher
+# Pocket Right(Center) : 1067 x 704 or Higher
+# Back Left(Center) : 881 x 4818 or Higher
+# Back Rightside(Center) : 1039 x 4803 or Higher
+# Sleeve Right(Center) : 1775 x 2140 or Higher
+# Pocket Left(Center) : 1067 x 703 or Higher
+# Back Leftside(Center) : 1039 x 4803 or Higher
+    "dress_with_pockets": [
+        ("front", (1487, 4796)),
+        ("front_left", (1053, 4780)),
+        ("front_right", (1053, 4780)),
+        ("back_right", (878, 4803)),
+        ("sleeve_left", (1775, 2140)),
+        ("pocket_right", (1067, 704)),
+        ("back_left", (881, 4818)),
+        ("back_rightside", (1039, 4803)),
+        ("sleeve_right", (1775, 2140)),
+        ("pocket_left", (1067, 703)),
+        ("back_leftside", (1039, 4803))],
+# Basketball tank tops (no pockets...)
+# Collar(Center) : 3000 x 270 or Higher
+# Back(Center) : 2887 x 4089 or Higher
+# Front(Center) : 2792 x 3978 or Higher
+    "basketball_tank_top": [
+        ("collar", (3000, 270)),
+        ("front", (2792, 3978)),
+        ("back", (2887, 4089))],
+    "15_in_laptop_sleeve": [
+        ("front", (2700, 2200))]}
 
 
 def highlight_file(style, filename):
@@ -150,38 +188,13 @@ def build_tiles(filenames,
     return (highlighted, glitched, cropped, glitched_tiled)
 
 
-# These are the dress pieces for the dress with pockets on cowcow
-# Front(Center) : 1487 x 4796 or Higher
-# Front Left(Center) : 1053 x 4780 or Higher
-# Front Right(Center) : 1053 x 4780 or Higher
-# Back Right(Center) : 878 x 4803 or Higher
-# Sleeve Left(Center) : 1775 x 2140 or Higher
-# Pocket Right(Center) : 1067 x 704 or Higher
-# Back Left(Center) : 881 x 4818 or Higher
-# Back Rightside(Center) : 1039 x 4803 or Higher
-# Sleeve Right(Center) : 1775 x 2140 or Higher
-# Pocket Left(Center) : 1067 x 703 or Higher
-# Back Leftside(Center) : 1039 x 4803 or Higher
-cowcow_dress_with_pockets = [
-    ("front", (1487, 4796)),
-    ("front_left", (1053, 4780)),
-    ("front_right", (1053, 4780)),
-    ("back_right", (878, 4803)),
-    ("sleeve_left", (1775, 2140)),
-    ("pocket_right", (1067, 704)),
-    ("back_left", (881, 4818)),
-    ("back_rightside", (1039, 4803)),
-    ("sleeve_right", (1775, 2140)),
-    ("pocket_left", (1067, 703)),
-    ("back_leftside", (1039, 4803))]
-
 
 def build_image(filenames,
                 style="paraiso-dark",
                 amount_glitch=75,
                 glitch_itr=6,
                 percent_original=10,
-                dress_piece_dims=cowcow_dress_with_pockets):
+                clothing="dress_with_pockets"):
     (highlighted, glitched, cropped, glitched_tiled) = build_tiles(
         filenames, style, amount_glitch, glitch_itr)
     num_tiles = len(cropped)
@@ -206,7 +219,7 @@ def build_image(filenames,
                     img.paste(random_tile(), (i, j))
         return (name_dim[0], img)
 
-    pieces = map(make_piece, dress_piece_dims)
+    pieces = map(make_piece, CLOTHING[clothing])
 
     return (pieces, highlighted, glitched, cropped, glitched_tiled)
 
@@ -233,6 +246,17 @@ def save_imgs(target_dir, imgs, ext):
         else:
             img.save(filename)
 
+def list_profiles():
+    print("The following clothing items are available:")
+    for profile in PROFILES.keys():
+        print(profile)
+
+
+def list_styles():
+    print("The following styles are available:")
+    for style in list(get_all_styles()):
+        print(style)
+
 
 if __name__ == "__main__":
     import argparse
@@ -246,11 +270,27 @@ if __name__ == "__main__":
     parser.add_argument('--extension', type=str, default="png",
                         nargs="?",
                         help="output extension")
+    parser.add_argument('--clothing', type=str, default='dress_with_pockets', nargs='?', help='Clothing item to generate images for (see all available profiles with --list-clothing)')
+    parser.add_argument('--list-clothing', dest='list_clothing', action='store_true', help='List all available clothing profiles and exit.' )
+    parser.add_argument('--style', type=str, default='paraiso-dark', nargs='?', help='The pygments style to use for the colour scheme (see all available styles with --list-styles)')
+    parser.add_argument('--list-styles', dest='list_styles', action='store_true', help='List all available style names.')
     args = parser.parse_args()
+
+    if args.list_clothing:
+        # The user just wants a list of profiles, let's print that and exit.
+        list_profiles()
+
+    if args.list_styles:
+        # Again, the user just wants a list of styles, let's print that.
+        list_styles()
+
+    if args.list_styles or args.list_clothing:
+        sys.exit(0)
+
     make_if_needed(args.output)
     print("Making the images in memory")
     (processed, highlighted, glitched, cropped,
-     glitched_tiled) = build_image(args.files)
+     glitched_tiled) = build_image(args.files, clothing=args.clothing, style=args.style)
     print("Saving the images to disk")
     save_imgs(args.output + "/processed", processed, args.extension)
     save_imgs(args.output + "/highlighted", highlighted, args.extension)

@@ -107,3 +107,6 @@ cowcowsecrets.py
 ssl.key
 ssl.csr
 *~
+
+# Default output dir
+out/
