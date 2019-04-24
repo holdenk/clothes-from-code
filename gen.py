@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import pygments
 import random
 from PIL import Image, ImageStat
 import jpglitch
@@ -8,8 +7,6 @@ from pygments.lexers import guess_lexer_for_filename
 from pygments.formatters import JpgImageFormatter
 from pygments.styles import get_all_styles
 import io
-import tempfile
-import copy
 import errno
 import os
 import math
@@ -23,18 +20,18 @@ tile_variance_threshold = 500
 tile_min_max_threshold = 110
 
 CLOTHING = {
-# These are the dress pieces for the dress with pockets on cowcow
-# Front(Center) : 1487 x 4796 or Higher
-# Front Left(Center) : 1053 x 4780 or Higher
-# Front Right(Center) : 1053 x 4780 or Higher
-# Back Right(Center) : 878 x 4803 or Higher
-# Sleeve Left(Center) : 1775 x 2140 or Higher
-# Pocket Right(Center) : 1067 x 704 or Higher
-# Back Left(Center) : 881 x 4818 or Higher
-# Back Rightside(Center) : 1039 x 4803 or Higher
-# Sleeve Right(Center) : 1775 x 2140 or Higher
-# Pocket Left(Center) : 1067 x 703 or Higher
-# Back Leftside(Center) : 1039 x 4803 or Higher
+    # These are the dress pieces for the dress with pockets on cowcow
+    # Front(Center) : 1487 x 4796 or Higher
+    # Front Left(Center) : 1053 x 4780 or Higher
+    # Front Right(Center) : 1053 x 4780 or Higher
+    # Back Right(Center) : 878 x 4803 or Higher
+    # Sleeve Left(Center) : 1775 x 2140 or Higher
+    # Pocket Right(Center) : 1067 x 704 or Higher
+    # Back Left(Center) : 881 x 4818 or Higher
+    # Back Rightside(Center) : 1039 x 4803 or Higher
+    # Sleeve Right(Center) : 1775 x 2140 or Higher
+    # Pocket Left(Center) : 1067 x 703 or Higher
+    # Back Leftside(Center) : 1039 x 4803 or Higher
     "dress_with_pockets": [
         ("front", (1487, 4796)),
         ("front_left", (1053, 4780)),
@@ -46,17 +43,19 @@ CLOTHING = {
         ("back_rightside", (1039, 4803)),
         ("sleeve_right", (1775, 2140)),
         ("pocket_left", (1067, 703)),
-        ("back_leftside", (1039, 4803))],
-# Basketball tank tops (no pockets...)
-# Collar(Center) : 3000 x 270 or Higher
-# Back(Center) : 2887 x 4089 or Higher
-# Front(Center) : 2792 x 3978 or Higher
+        ("back_leftside", (1039, 4803)),
+    ],
+    # Basketball tank tops (no pockets...)
+    # Collar(Center) : 3000 x 270 or Higher
+    # Back(Center) : 2887 x 4089 or Higher
+    # Front(Center) : 2792 x 3978 or Higher
     "basketball_tank_top": [
         ("collar", (3000, 270)),
         ("front", (2792, 3978)),
-        ("back", (2887, 4089))],
-    "15_in_laptop_sleeve": [
-        ("front", (2700, 2200))]}
+        ("back", (2887, 4089)),
+    ],
+    "15_in_laptop_sleeve": [("front", (2700, 2200))],
+}
 
 
 def highlight_file(style, filename):
@@ -86,7 +85,6 @@ def glitch_image(image, amount_glitch, glitch_itr):
         print("Glitching {0}th time".format(i))
         jpeg.glitch_bytes()
         try:
-            stream = io.BytesIO(jpeg.new_bytes)
             img_bytes = jpeg.new_bytes
         except IOError:
             break
@@ -98,20 +96,22 @@ def tileify(img):
     Takes in an image and produces several smaller tiles.
     Tiles are uniform in shape but may not be uniformly cut.
     """
+
     def contains_interesting_code(img):
         """Returns true if the image tile contains enough variation"""
         stat = ImageStat.Stat(img)
         total_variance = sum(stat.var)
-        min_max_diff = map(lambda x: x[1]-x[0], stat.extrema)
+        min_max_diff = map(lambda x: x[1] - x[0], stat.extrema)
         min_max_diff_sum = sum(min_max_diff)
-        print("Got variance {0} from {1} min_max_dif {2} from {3}".format(
-            total_variance,
-            stat.var,
-            min_max_diff_sum,
-            min_max_diff))
+        print(
+            "Got variance {0} from {1} min_max_dif {2} from {3}".format(
+                total_variance, stat.var, min_max_diff_sum, min_max_diff
+            )
+        )
         return (
-            total_variance > tile_variance_threshold and
-            min_max_diff_sum > tile_min_max_threshold)
+            total_variance > tile_variance_threshold
+            and min_max_diff_sum > tile_min_max_threshold
+        )
 
     offset_range = 50
     # crop takes (left, upper, right, lower)-tuple.
@@ -125,14 +125,25 @@ def tileify(img):
         for h in range(int(math.ceil(source_size[1] / tile_target_height))):
             x_offset = min(
                 source_size[0] - tile_target_width,
-                (random.randint(0, offset_range) +
-                 source_size[0] - ((w + 1) * tile_target_width)))
+                (
+                    random.randint(0, offset_range)
+                    + source_size[0]
+                    - ((w + 1) * tile_target_width)
+                ),
+            )
             y_offset = min(
                 source_size[1] - tile_target_height,
-                (random.randint(0, offset_range) +
-                 source_size[1] - ((h + 1) * tile_target_height)))
-            print("Generating image for ({0},{1}) with offsets ({2},{3})".format(
-                w, h, x_offset, y_offset))
+                (
+                    random.randint(0, offset_range)
+                    + source_size[1]
+                    - ((h + 1) * tile_target_height)
+                ),
+            )
+            print(
+                "Generating image for ({0},{1}) with offsets ({2},{3})".format(
+                    w, h, x_offset, y_offset
+                )
+            )
             x0 = x_offset + (w * tile_target_width)
             y0 = y_offset + (h * tile_target_height)
             x1 = x_offset + ((w + 1) * tile_target_width)
@@ -162,15 +173,10 @@ def tileify(img):
     return random.sample(tiles, num_tiles_to_return)
 
 
-def build_tiles(filenames,
-                style,
-                amount_glitch,
-                glitch_itr):
+def build_tiles(filenames, style, amount_glitch, glitch_itr):
     """ Builds the tiles which we will assembly into a dress """
     # Highlight all of our inputs
-    highlighted = map(
-        lambda filename: highlight_file(style, filename),
-        filenames)
+    highlighted = map(lambda filename: highlight_file(style, filename), filenames)
     # Take the inputs and chop them up into tiles of a consistent size but semi random
     # locations
     ocropped = map(tileify, highlighted)
@@ -180,23 +186,26 @@ def build_tiles(filenames,
         for i in c:
             cropped.append(i)
     print("compacted to {0}".format(cropped))
-    glitched_tiled = list(map(
-        lambda img: glitch_image(img, amount_glitch, glitch_itr),
-        cropped))
-    glitched = map(lambda img: glitch_image(
-        img, amount_glitch, glitch_itr), highlighted)
+    glitched_tiled = list(
+        map(lambda img: glitch_image(img, amount_glitch, glitch_itr), cropped)
+    )
+    glitched = map(
+        lambda img: glitch_image(img, amount_glitch, glitch_itr), highlighted
+    )
     return (highlighted, glitched, cropped, glitched_tiled)
 
 
-
-def build_image(filenames,
-                style="paraiso-dark",
-                amount_glitch=75,
-                glitch_itr=6,
-                percent_original=10,
-                clothing="dress_with_pockets"):
+def build_image(
+    filenames,
+    style="paraiso-dark",
+    amount_glitch=75,
+    glitch_itr=6,
+    percent_original=10,
+    clothing="dress_with_pockets",
+):
     (highlighted, glitched, cropped, glitched_tiled) = build_tiles(
-        filenames, style, amount_glitch, glitch_itr)
+        filenames, style, amount_glitch, glitch_itr
+    )
     num_tiles = len(cropped)
 
     def random_tile():
@@ -209,7 +218,7 @@ def build_image(filenames,
     def make_piece(name_dim):
         """Make some glitched code combined for some specific dimensions"""
         dim = name_dim[1]
-        img = Image.new('RGB', dim)
+        img = Image.new("RGB", dim)
         for i in range(0, dim[0], tile_target_width):
             for j in range(0, dim[1], tile_target_height):
                 # Some tiles are bad, lets get another tile
@@ -246,9 +255,10 @@ def save_imgs(target_dir, imgs, ext):
         else:
             img.save(filename)
 
+
 def list_profiles():
     print("The following clothing items are available:")
-    for profile in PROFILES.keys():
+    for profile in CLOTHING.keys():
         print(profile)
 
 
@@ -260,20 +270,43 @@ def list_styles():
 
 if __name__ == "__main__":
     import argparse
-    parser = argparse.ArgumentParser(description='Process some code')
-    parser.add_argument('--files', type=str, default=["gen.py"],
-                        nargs="*",
-                        help="file names to process")
-    parser.add_argument('--output', type=str, default="out",
-                        nargs="?",
-                        help="output directory")
-    parser.add_argument('--extension', type=str, default="png",
-                        nargs="?",
-                        help="output extension")
-    parser.add_argument('--clothing', type=str, default='dress_with_pockets', nargs='?', help='Clothing item to generate images for (see all available profiles with --list-clothing)')
-    parser.add_argument('--list-clothing', dest='list_clothing', action='store_true', help='List all available clothing profiles and exit.' )
-    parser.add_argument('--style', type=str, default='paraiso-dark', nargs='?', help='The pygments style to use for the colour scheme (see all available styles with --list-styles)')
-    parser.add_argument('--list-styles', dest='list_styles', action='store_true', help='List all available style names.')
+
+    parser = argparse.ArgumentParser(description="Process some code")
+    parser.add_argument(
+        "--files", type=str, default=["gen.py"], nargs="*", help="file names to process"
+    )
+    parser.add_argument(
+        "--output", type=str, default="out", nargs="?", help="output directory"
+    )
+    parser.add_argument(
+        "--extension", type=str, default="png", nargs="?", help="output extension"
+    )
+    parser.add_argument(
+        "--clothing",
+        type=str,
+        default="dress_with_pockets",
+        nargs="?",
+        help="Clothing item to generate images for (see all available profiles with --list-clothing)",
+    )
+    parser.add_argument(
+        "--list-clothing",
+        dest="list_clothing",
+        action="store_true",
+        help="List all available clothing profiles and exit.",
+    )
+    parser.add_argument(
+        "--style",
+        type=str,
+        default="paraiso-dark",
+        nargs="?",
+        help="The pygments style to use for the colour scheme (see all available styles with --list-styles)",
+    )
+    parser.add_argument(
+        "--list-styles",
+        dest="list_styles",
+        action="store_true",
+        help="List all available style names.",
+    )
     args = parser.parse_args()
 
     if args.list_clothing:
@@ -289,8 +322,9 @@ if __name__ == "__main__":
 
     make_if_needed(args.output)
     print("Making the images in memory")
-    (processed, highlighted, glitched, cropped,
-     glitched_tiled) = build_image(args.files, clothing=args.clothing, style=args.style)
+    (processed, highlighted, glitched, cropped, glitched_tiled) = build_image(
+        args.files, clothing=args.clothing, style=args.style
+    )
     print("Saving the images to disk")
     save_imgs(args.output + "/processed", processed, args.extension)
     save_imgs(args.output + "/highlighted", highlighted, args.extension)
