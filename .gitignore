@@ -106,3 +106,4 @@ env/
 cowcowsecrets.py
 ssl.key
 ssl.csr
+*~

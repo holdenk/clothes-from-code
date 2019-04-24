@@ -1,15 +1,5 @@
-<html>
-  <head>
+{% include "header.html" %}
     <title>Generating Dress</title>
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-138710337-1"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'UA-138710337-1');
-    </script>
   </head>
   <body>
     <p>We are now (very very slowly) generating your dress, {{dress_name}}, based on the code at {{ code_url }} :)</p>
@@ -19,12 +9,15 @@
     <p>{{ row }}</p>
     {% endfor %}
     <p>And the dress is done (or we crashed)! Go <a href="https://www.cowcow.com/artist/holdensglitchcode?2855124&sort=2">checkout the store</a>. Your
-      <a href="https://www.cowcow.com/shop//{{dress_name | urlencode }}?2855124&store=holdensglitchcodedress"> should have a name {{dress_name}}</a>.</p>
+      <a href="https://www.cowcow.com/shop//{{dress_name | urlencode }}?2855124&store=holdensglitchcodedress"> should have a name {{dress_name}}</a>.
+    </p>
+    <p>
+      But sometimes the names get a bit messed up in which case <a href="https://www.cowcow.com/artist/holdensglitchcode?2855124&sort=2">you should be able to find your dress in this list</a>.
+    </p>
     <!-- sketchy JS rdr -->
     <script>
       setTimeout(function() {
       window.location.href = "https://www.cowcow.com/shop//{{dress_name | urlencode }}?2855124&store=holdensglitchcodedress";
-      }, 3000000);
+      }, 3500000);
     </script>
-  </body>
-</html>
+{% include "footer.html" %}
