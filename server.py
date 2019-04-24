@@ -1,4 +1,4 @@
-from flask import Flask, Response, request, send_from_directory
+from flask import Flask, Response, request, render_template, send_from_directory
 import re
 import subprocess
 import urllib
@@ -7,10 +7,14 @@ from markupsafe import Markup
 
 app = Flask(__name__)
 
-
 @app.route('/')
-def hello_world():
-    return send_from_directory("static", "index.html")
+def index():
+    return render_template("index.html")
+
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory("static", "favicon.ico")
 
 
 @app.route('/js/<path:path>')
@@ -27,7 +31,7 @@ def stream_template(template_name, **context):
     app.update_template_context(context)
     t = app.jinja_env.get_template(template_name)
     rv = t.stream(context)
-    rv.enable_buffering(5)
+    rv.enable_buffering(1)
     return rv
 
 
