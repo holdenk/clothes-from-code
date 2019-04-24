@@ -1,7 +1,15 @@
 apiVersion: networking.gke.io/v1beta1
 kind: ManagedCertificate
 metadata:
-  name: haute-certificate
+  name:		r2-haute-certificate
 spec:
   domains:
     - haute.codes
+---
+apiVersion: networking.gke.io/v1beta1
+kind: ManagedCertificate
+metadata:
+  name: r2-www-haute-certificate
+spec:
+  domains:
+    - www.haute.codes

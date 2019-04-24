@@ -3,9 +3,9 @@ kind: Ingress
 metadata:
   name: tls-ingress
   annotations:
-    kubernetes.io/ingress.global-static-ip-name: "haute-code"
-    networking.gke.io/managed-certificates: haute-certificate
+    kubernetes.io/ingress.global-static-ip-name: haute-code-global
+    networking.gke.io/managed-certificates: r2-haute-certificate,r-2www-haute-certificate
 spec:
   backend:
-    serviceName: haute-code
+    serviceName: haute-code-service
     servicePort: 80
