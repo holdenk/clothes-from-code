@@ -3,7 +3,7 @@ import re
 import subprocess
 import urllib
 from markupsafe import Markup
-
+from gen import get_profiles, get_styles
 
 app = Flask(__name__)
 
