@@ -11,6 +11,7 @@ import errno
 import os
 import math
 import sys
+from clothing import cowcow_items
 
 # Some sketchy global configs
 desired_max_tiles = 100
@@ -18,44 +19,6 @@ tile_target_width = 500
 tile_target_height = 500
 tile_variance_threshold = 500
 tile_min_max_threshold = 110
-
-CLOTHING = {
-    # These are the dress pieces for the dress with pockets on cowcow
-    # Front(Center) : 1487 x 4796 or Higher
-    # Front Left(Center) : 1053 x 4780 or Higher
-    # Front Right(Center) : 1053 x 4780 or Higher
-    # Back Right(Center) : 878 x 4803 or Higher
-    # Sleeve Left(Center) : 1775 x 2140 or Higher
-    # Pocket Right(Center) : 1067 x 704 or Higher
-    # Back Left(Center) : 881 x 4818 or Higher
-    # Back Rightside(Center) : 1039 x 4803 or Higher
-    # Sleeve Right(Center) : 1775 x 2140 or Higher
-    # Pocket Left(Center) : 1067 x 703 or Higher
-    # Back Leftside(Center) : 1039 x 4803 or Higher
-    "dress_with_pockets": [
-        ("front", (1487, 4796)),
-        ("front_left", (1053, 4780)),
-        ("front_right", (1053, 4780)),
-        ("back_right", (878, 4803)),
-        ("sleeve_left", (1775, 2140)),
-        ("pocket_right", (1067, 704)),
-        ("back_left", (881, 4818)),
-        ("back_rightside", (1039, 4803)),
-        ("sleeve_right", (1775, 2140)),
-        ("pocket_left", (1067, 703)),
-        ("back_leftside", (1039, 4803)),
-    ],
-    # Basketball tank tops (no pockets...)
-    # Collar(Center) : 3000 x 270 or Higher
-    # Back(Center) : 2887 x 4089 or Higher
-    # Front(Center) : 2792 x 3978 or Higher
-    "basketball_tank_top": [
-        ("collar", (3000, 270)),
-        ("front", (2792, 3978)),
-        ("back", (2887, 4089)),
-    ],
-    "15_in_laptop_sleeve": [("front", (2700, 2200))],
-}
 
 
 def highlight_file(style, filename):
@@ -228,7 +191,7 @@ def build_image(
                     img.paste(random_tile(), (i, j))
         return (name_dim[0], img)
 
-    pieces = map(make_piece, CLOTHING[clothing])
+    pieces = map(make_piece, cowcow_items[clothing].panels)
 
     return (pieces, highlighted, glitched, cropped, glitched_tiled)
 
@@ -258,7 +221,7 @@ def save_imgs(target_dir, imgs, ext):
 
 def list_profiles():
     print("The following clothing items are available:")
-    for profile in CLOTHING.keys():
+    for profile in cowcow_items.keys():
         print(profile)
 
 
@@ -307,6 +270,7 @@ if __name__ == "__main__":
         action="store_true",
         help="List all available style names.",
     )
+
     args = parser.parse_args()
 
     if args.list_clothing:
@@ -330,4 +294,5 @@ if __name__ == "__main__":
     save_imgs(args.output + "/highlighted", highlighted, args.extension)
     save_imgs(args.output + "/glitched", glitched, args.extension)
     save_imgs(args.output + "/cropped", cropped, args.extension)
+
     save_imgs(args.output + "/glitched_tiled", glitched_tiled, args.extension)

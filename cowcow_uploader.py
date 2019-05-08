@@ -8,6 +8,7 @@ import http.cookiejar as cookielib
 import random
 import string
 import mechanize
+from clothing import cowcow_items
 
 import time
 
@@ -33,7 +34,7 @@ def load_cookie_or_login(driver):
 
 def do_login(driver, username, password):
     """ Login to cowcow """
-    print("Logging into cowcow t0 upload")
+    print("Logging into cowcow to upload")
     driver.get(login_url)
     assert "Login" in driver.title
     username_elem = driver.find_element_by_name("tbEmail")
@@ -90,31 +91,19 @@ def upload_imgs(imgs):
         br.submit()
 
 
-dress_filenames = [
-    "front",
-    "front_left",
-    "front_right",
-    "back_right",
-    "sleeve_left",
-    "pocket_right",
-    "back_left",
-    "back_rightside",
-    "sleeve_right",
-    "pocket_left",
-    "back_leftside"]
 
-
-def upload_dress_imgs(br, dress_output_directory):
+def upload_dress_imgs(br, clothing_name, dress_output_directory):
     def create_absolute_filename(f):
         return "{0}/processed/{1}.png".format(
             dress_output_directory,
             f)
+    dress_filenames = map(lambda x: x[0], cowcow_items[clothing_name].panels)
     imgs = map(create_absolute_filename, dress_filenames)
     print("Uploading the images.")
     return upload_imgs(imgs)
 
 
-def create_dress(driver, dress_output_directory, dress_name):
+def create_dress(driver, clothing_name, dress_output_directory, dress_name):
     def filename_to_cowcow(f):
         cowcowname = "{0}_processed_{1}.png({2})".format(
             dress_output_directory,
@@ -126,9 +115,10 @@ def create_dress(driver, dress_output_directory, dress_name):
         cowcowname = re.sub("/", "_", cowcowname)
         return cowcowname
 
+    dress_filenames = map(lambda x: x[0], cowcow_items[clothing_name].panels)
     cowcow_img_specs = map(filename_to_cowcow, dress_filenames)
     cowcow_img_spec = " | ".join(cowcow_img_specs)
-    cowcow_product_id = "2170"
+    cowcow_product_id = cowcow_items[clothing_name].cowcowid
     section_code = "01"
     unique_product_code = dress_output_directory + \
         ''.join(random.choices(string.ascii_uppercase + string.digits, k=10))
@@ -150,25 +140,39 @@ def create_dress(driver, dress_output_directory, dress_name):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Upload a dress to cowcow')
+    parser.add_argument('--dress_name', type=str,
+                        nargs="?",
+                        help="name of the dress")
+    parser.add_argument('--dress_dir', type=str,
+                        nargs="?",
+                        help="directory where the dress files all live")
+    parser.add_argument(
+        "--clothing",
+        type=str,
+        default="dress_with_pockets",
+        nargs="?",
+        help="Clothing item to generate images for (see all available profiles with --list-clothing)",
+        )
+    parser.add_argument('--foreground-gecko',
+                        dest="foreground_gecko",
+                        action="store_true",
+                        help="run the driver in the foreground for debugging")
+    args = parser.parse_args()
     try:
-        parser = argparse.ArgumentParser(description='Upload a dress to cowcow')
-        parser.add_argument('--dress_name', type=str,
-                            nargs="?",
-                            help="name of the dress")
-        parser.add_argument('--dress_dir', type=str,
-                            nargs="?",
-                            help="directory where the dress files all live")
-        args = parser.parse_args()
-
         options = Options()
 
-        options.headless = True
-        options.add_argument("--headless")
+        if not args.foreground_gecko:
+            options.headless = True
+            options.add_argument("--headless")
 
+        print("Launching driver....")
         driver = webdriver.Firefox(options=options)
 
         br = construct_br(driver)
-        upload_dress_imgs(br, args.dress_dir)
-        create_dress(driver, args.dress_dir, args.dress_name)
+        print("Uploading the dress....")
+        upload_dress_imgs(br, args.clothing, args.dress_dir)
+        print("Creating the dress....")
+        create_dress(driver, args.clothing, args.dress_dir, args.dress_name)
     finally:
         driver.close()
