@@ -3,13 +3,14 @@ import re
 import subprocess
 import urllib
 from markupsafe import Markup
-from gen import get_profiles, get_styles
+from gen import get_profiles
 
 app = Flask(__name__)
 
 @app.route('/')
 def index():
-    return render_template("index.html")
+    clothing_items = get_profiles()
+    return render_template("index.html", clothing_items=clothing_items)
 
 
 @app.route('/favicon.ico')
@@ -31,7 +32,7 @@ def stream_template(template_name, **context):
     app.update_template_context(context)
     t = app.jinja_env.get_template(template_name)
     rv = t.stream(context)
-    rv.enable_buffering(1)
+    # rv.enable_buffering(1)
     return rv
 
 
@@ -91,11 +92,13 @@ def generate_dress():
         return send_from_directory("static", "missing_url.html")
     else:
         requested_code_url = request.form["url"]
+        clothing_type = request.form["clothing_type"] or "dress_with_pockets"
         code_url = handle_non_raw_code_urls(requested_code_url)
         dress_name = clean_name(extract_dress_name(code_url))
         dress_dir = re.sub("[^a-zA-Z]", "_",  dress_name)[0:10]
         proc = subprocess.Popen(
             ["./wrapwork.sh",
+             clothing_type,
              dress_dir,
              dress_name,
              code_url],

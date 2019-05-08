@@ -219,9 +219,13 @@ def save_imgs(target_dir, imgs, ext):
             img.save(filename)
 
 
+def get_profiles():
+    return cowcow_items.keys()
+
+
 def list_profiles():
     print("The following clothing items are available:")
-    for profile in cowcow_items.keys():
+    for profile in get_profiles():
         print(profile)
 
 

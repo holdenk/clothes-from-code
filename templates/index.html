@@ -35,6 +35,19 @@
 	    <p class="help-block">Provide a link to your raw code to turn into a dress</p>
 	  </div>
 	</div>
+	<!-- Clothing Type Selector -->
+	<div class="control-group">
+	  <label class="control-label" for="clothing_type">Type of Clothing</label>
+	  <div class="controls">
+	    <select name="clothing_type">
+	      {% for item in clothing_items %}
+	      <option value="{{item}}"> {{item}} </option>
+	      {% endfor %}
+	    </select>
+	    <p class="help-block">The kind of clothing item you wish to generate</p>
+	  </div>
+	</div>
+
 
       </fieldset>
       <input type="submit" />

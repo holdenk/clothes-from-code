@@ -1,9 +1,11 @@
 #!/bin/bash
-DRESS_DIR=$1
+CLOTHING_TYPE=$1
+export CLOTHING_TYPE
+DRESS_DIR=$2
 export DRESS_DIR
-DRESS_NAME=$2
+DRESS_NAME=$3
 export DRESS_NAME
-DRESS_CODE_URL=$3
+DRESS_CODE_URL=$4
 export DRESS_CODE_URL
 if [ -z "$DRESS_NAME" ]; then
   echo "No dress name specified. leaving"

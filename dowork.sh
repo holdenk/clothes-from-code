@@ -7,4 +7,4 @@ INPUT_FILENAME=$(ls -1 /tmp/"${DRESS_DIR}"/)
 echo "Generating images"
 python gen.py --files /tmp/"${DRESS_DIR}"/"${INPUT_FILENAME}" --out /tmp/"${DRESS_DIR}" --clothing "${CLOTHING_TYPE}"
 echo "Starting upload of images"
-python cowcow_uploader.py --dress_name "${DRESS_NAME}" --dress_dir /tmp/"${DRESS_DIR}"
+python cowcow_uploader.py --dress_name "${DRESS_NAME}" --dress_dir /tmp/"${DRESS_DIR}" --clothing "${CLOTHING_TYPE}"
