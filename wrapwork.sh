@@ -16,6 +16,6 @@ if [ -z "$DRESS_CODE_URL" ]; then
   exit 0
 fi
 echo "Generating the dress"
-./dowork.sh || echo "Failed to generate the dress"
+unbuffer ./dowork.sh || echo "Failed to generate the dress"
 echo "Cleaning up"
 rm -rf /tmp/"${DRESS_DIR}"

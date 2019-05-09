@@ -5,6 +5,8 @@ metadata:
     name: haute-code-service
   name: haute-code-service
   namespace: default
+  annotations:
+    beta.cloud.google.com/backend-config: '{"ports": {"80":"haute-backend-config"}}'
 spec:
   externalTrafficPolicy: Cluster
   ports:

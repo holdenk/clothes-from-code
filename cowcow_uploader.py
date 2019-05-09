@@ -3,7 +3,6 @@ import re
 from cowcowsecrets import *
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.firefox.options import Options
 import http.cookiejar as cookielib
 import random
 import string
@@ -36,6 +35,12 @@ def do_login(driver, username, password):
     """ Login to cowcow """
     print("Logging into cowcow to upload")
     driver.get(login_url)
+    # Give firefox a few cycles to find the driver title
+    c = 0
+    while "Login" not in driver.title and c < 10:
+        print("Driver title is: {0}".format(driver.title))
+        time.sleep(1)
+        c = c+1
     assert "Login" in driver.title
     username_elem = driver.find_element_by_name("tbEmail")
     username_elem.clear()
@@ -74,7 +79,7 @@ def upload_imgs(imgs):
     print("Uploading...")
     for img in imgs:
         print("Fetching file manager...")
-        time.sleep(1)
+        time.sleep(2)
         response = br.open(file_manager)
         # Manually specify the form
         br.form = mechanize.HTMLForm(
@@ -87,9 +92,17 @@ def upload_imgs(imgs):
         file_controller = br.find_control(id="fileupload", name="files[]")
         print("Adding img {0}".format(img))
         filename = re.sub("/", "_", img)
-        file_controller.add_file(open(img, 'rb'), "image/png", filename)
-        br.submit()
-
+        with open(img, 'rb') as img_handle:
+            try:
+                print("Opened img {0}".format(img))
+                file_controller.add_file(img_handle, "image/png", filename)
+                print("Added img to controller")
+                br.submit()
+                print("Submitted form".format(img))
+            except Error as e:
+                print("Sad :(")
+                print("Error {0} adding img {1}".format(e, img))
+                raise
 
 
 def upload_dress_imgs(br, clothing_name, dress_output_directory):
@@ -140,6 +153,7 @@ def create_dress(driver, clothing_name, dress_output_directory, dress_name):
 
 
 if __name__ == "__main__":
+    print("Hi! I'm your friendly cowcow uploader. I am slow. Please waite.")
     parser = argparse.ArgumentParser(description='Upload a dress to cowcow')
     parser.add_argument('--dress_name', type=str,
                         nargs="?",
@@ -159,20 +173,24 @@ if __name__ == "__main__":
                         action="store_true",
                         help="run the driver in the foreground for debugging")
     args = parser.parse_args()
+    print("Args parsed.")
     try:
-        options = Options()
+        options = webdriver.ChromeOptions()
 
         if not args.foreground_gecko:
             options.headless = True
             options.add_argument("--headless")
+            options.add_argument("--no-sandbox")
 
         print("Launching driver....")
-        driver = webdriver.Firefox(options=options)
+        driver = webdriver.Chrome(options=options)
 
         br = construct_br(driver)
         print("Uploading the dress....")
         upload_dress_imgs(br, args.clothing, args.dress_dir)
         print("Creating the dress....")
         create_dress(driver, args.clothing, args.dress_dir, args.dress_name)
+        print("Finished talking to cowcow...")
     finally:
+        print("Cleaning up the driver")
         driver.close()

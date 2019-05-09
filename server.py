@@ -32,7 +32,7 @@ def stream_template(template_name, **context):
     app.update_template_context(context)
     t = app.jinja_env.get_template(template_name)
     rv = t.stream(context)
-    # rv.enable_buffering(1)
+    rv.disable_buffering()
     return rv
 
 
@@ -102,7 +102,7 @@ def generate_dress():
              dress_dir,
              dress_name,
              code_url],
-            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False)
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=False, bufsize=1)
 
         return Response(
             stream_template('generated.html',

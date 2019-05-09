@@ -1,7 +1,7 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: tls-ingress
+  name: haute-tls-ingress
   annotations:
     kubernetes.io/ingress.global-static-ip-name: haute-code-global
     networking.gke.io/managed-certificates: r2-haute-certificate,r-2www-haute-certificate

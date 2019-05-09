@@ -17,11 +17,11 @@ spec:
     spec:
       containers:
         - name: haute-code
-          image: gcr.io/boos-demo-projects-are-rad/haute-code:v4
+          image: gcr.io/boos-demo-projects-are-rad/haute-code:v16
           ports:
             - containerPort: 5000
           resources:
             requests:
-              memory: 4024Mi
+              memory: 6024Mi
             limits:
-              memory: 4548Mi
+              memory: 6548Mi
