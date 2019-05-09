@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: haute-code
-          image: gcr.io/boos-demo-projects-are-rad/haute-code:v16
+          image: gcr.io/boos-demo-projects-are-rad/haute-code:v17
           ports:
             - containerPort: 5000
           resources:
