@@ -292,7 +292,3 @@ if __name__ == "__main__":
     )
     print("Saving the images to disk")
     save_imgs(args.output + "/processed", processed, args.extension)
-    save_imgs(args.output + "/highlighted", highlighted, args.extension)
-    save_imgs(args.output + "/cropped", cropped, args.extension)
-
-    save_imgs(args.output + "/glitched_tiled", glitched_tiled, args.extension)
