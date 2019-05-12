@@ -152,10 +152,7 @@ def build_tiles(filenames, style, amount_glitch, glitch_itr):
     glitched_tiled = list(
         map(lambda img: glitch_image(img, amount_glitch, glitch_itr), cropped)
     )
-    glitched = map(
-        lambda img: glitch_image(img, amount_glitch, glitch_itr), highlighted
-    )
-    return (highlighted, glitched, cropped, glitched_tiled)
+    return (highlighted, cropped, glitched_tiled)
 
 
 def build_image(
@@ -166,7 +163,7 @@ def build_image(
     percent_original=10,
     clothing="dress_with_pockets",
 ):
-    (highlighted, glitched, cropped, glitched_tiled) = build_tiles(
+    (highlighted, cropped, glitched_tiled) = build_tiles(
         filenames, style, amount_glitch, glitch_itr
     )
     num_tiles = len(cropped)
@@ -193,7 +190,7 @@ def build_image(
 
     pieces = map(make_piece, cowcow_items[clothing].panels)
 
-    return (pieces, highlighted, glitched, cropped, glitched_tiled)
+    return (pieces, highlighted, cropped, glitched_tiled)
 
 
 def make_if_needed(target_dir):
@@ -290,13 +287,12 @@ if __name__ == "__main__":
 
     make_if_needed(args.output)
     print("Making the images in memory")
-    (processed, highlighted, glitched, cropped, glitched_tiled) = build_image(
+    (processed, highlighted, cropped, glitched_tiled) = build_image(
         args.files, clothing=args.clothing, style=args.style
     )
     print("Saving the images to disk")
     save_imgs(args.output + "/processed", processed, args.extension)
     save_imgs(args.output + "/highlighted", highlighted, args.extension)
-    save_imgs(args.output + "/glitched", glitched, args.extension)
     save_imgs(args.output + "/cropped", cropped, args.extension)
 
     save_imgs(args.output + "/glitched_tiled", glitched_tiled, args.extension)
