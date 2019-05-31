@@ -141,15 +141,19 @@ def create_dress(driver, clothing_name, dress_output_directory, dress_name):
         unique_product_code,
         section_code,
         dress_name)
-    result = br.open(bulk_product_url)
-    print("Creating the product entry")
-    driver.get(bulk_product_url)
-    print("Sending in {0}".format(cowcow_product_spec))
-    textElem = driver.find_element_by_name("ctl00$cphMain$tbBulkAddProduct")
-    textElem.clear()
-    textElem.send_keys(cowcow_product_spec)
-    updateElem = driver.find_element_by_id("ctl00_cphMain_ebImport")
-    updateElem.click()
+    def configure_product():
+        result = br.open(bulk_product_url)
+        print("Creating the product entry")
+        driver.get(bulk_product_url)
+        print("Sending in {0}".format(cowcow_product_spec))
+        textElem = driver.find_element_by_name("ctl00$cphMain$tbBulkAddProduct")
+        textElem.clear()
+        textElem.send_keys(cowcow_product_spec)
+        updateElem = driver.find_element_by_id("ctl00_cphMain_ebImport")
+        updateElem.click()
+        # Kind of a hack, but the image should upload within 10
+        time.sleep(10)
+    configure_product()
 
 
 if __name__ == "__main__":

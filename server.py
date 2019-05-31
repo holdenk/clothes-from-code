@@ -55,7 +55,7 @@ gh_raw_re = re.compile(
 file_domain_re = re.compile("^https://(.*?)/.*/(.*?)$")
 
 
-def extract_dress_name(code_url):
+def extract_dress_name(code_url, clothing_type):
     """Try and turn a URL into a dress name"""
     match = gh_raw_re.match(code_url)
     if match is None:
@@ -68,9 +68,9 @@ def extract_dress_name(code_url):
         # Some folks have the group and repo name as the same
         if (match.group(1) != match.group(2) and
             not match.group(2).startswith(match.group(1))):
-            return match.group(1) + " " + match.group(2) + "'s " + match.group(3) + " glitch code dress"
+            return match.group(1) + " " + match.group(2) + "'s " + match.group(3) + " glitch code " + clothing_type
         else:
-            return match.group(2) + "'s " + match.group(3) + " glitch code dress"
+            return match.group(2) + "'s " + match.group(3) + " glitch code " + clothing_type
 
 
 def clean_name(name):
@@ -94,7 +94,7 @@ def generate_dress():
         requested_code_url = request.form["url"]
         clothing_type = request.form["clothing_type"] or "dress_with_pockets"
         code_url = handle_non_raw_code_urls(requested_code_url)
-        dress_name = clean_name(extract_dress_name(code_url))
+        dress_name = clean_name(extract_dress_name(code_url, clothing_type))
         dress_dir = re.sub("[^a-zA-Z]", "_",  dress_name)[0:10]
         proc = subprocess.Popen(
             ["./wrapwork.sh",
