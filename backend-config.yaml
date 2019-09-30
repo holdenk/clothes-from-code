@@ -3,6 +3,6 @@ kind: BackendConfig
 metadata:
   name: haute-backend-config
 spec:
-  timeoutSec: 600
+  timeoutSec: 3600
   connectionDraining:
     drainingTimeoutSec: 600
